@@ -13,8 +13,8 @@ async function runQuery(sql, binds = []) {
   let conn;
   try {
     conn = await oracledb.getConnection({
-      user: "username",
-      password: "password",
+      user: "mborghardt",
+      password: "M15d26m26!",
       connectString: "rs03-db-inf-min.ad.fh-bielefeld.de:1521/orcl.rs03-db-inf-min.ad.fh-bielefeld.de"
     });
 
@@ -27,7 +27,7 @@ async function runQuery(sql, binds = []) {
   }
 }
 
-// Beispiel‑Endpoint: alle Studenten
+// Beispiel‑Endpoint: alle Besucher
 app.get("/api/besucher", async (req, res) => {
   try {
     const rows = await runQuery("SELECT * FROM BESUCHER");
