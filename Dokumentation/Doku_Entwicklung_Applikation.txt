@@ -1,0 +1,23 @@
+(10.06.2026):
+
+- Folgende Dateien für die Website erstellt, damit man für den Anfang eine funktionierende Oberfläche hat, in der man sich mit der Datenbank verbinden kann:
+	- assets/style.css
+	- config/db.php
+	- Controllers/db_login_check.php
+	- public/db_login.php
+	- public/db_logout.php
+	- public/dashboard.php # Temporäre Datei
+
+(16.06.2026):
+
+- Eine sequence erstellt für die Personen_id, Besucher_id und Angestellter_id, weil Oracle das nicht von selber tut
+- Tabelle PERSON angepasst: Passwort hinzugefügt, für jeden Datensatz eine Mail eingefügt, Email auf not null gesetzt
+- 2 Stored Procedures angelegt für die Anmeldung und für die Regestrierung
+- Folgende Dateien für die Website hinzugefügt:
+	- public/user_login.php
+	- public/user_logout.php
+	- public/register.php
+	- public/dashboard_besucher.php
+	- public/dashboard_mitarbeiter.php
+	- controllers/user_login_check.php
+	- controllers/register_check.php

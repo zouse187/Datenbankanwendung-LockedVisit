@@ -1,4 +1,5 @@
 <?php
+// Startet die Sitzung, um z.B. Fehlermeldungen auslesen zu können
 session_start();
 ?>
 <!DOCTYPE html>
@@ -19,7 +20,7 @@ session_start();
             <?php unset($_SESSION['login_error']); ?>
         <?php endif; ?>
 
-        <form action="login_check.php" method="post">
+        <form action="../controllers/db_login_check.php" method="post">
             <label for="username">DB-User</label>
             <input type="text" id="username" name="username" required>
 

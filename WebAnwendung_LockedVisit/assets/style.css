@@ -1,8 +1,10 @@
+/* Styling für die gesamte Webseite */
 body {
     font-family: Arial, sans-serif;
     background: #f4f4f4;
 }
 
+/* Styling für die Box, in der das Login-Formular liegt */
 .login-container {
     max-width: 380px;
     margin: 80px auto;
@@ -12,11 +14,13 @@ body {
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
+/* Styling für die Beschriftungstexte (Labels) */
 label {
     display: block;
     margin-top: 10px;
 }
 
+/* Styling für die Eingabefelder (z.B. E-Mail, Passwort) */
 input {
     width: 100%;
     padding: 8px;
@@ -24,6 +28,7 @@ input {
     box-sizing: border-box;
 }
 
+/* Styling für Buttons */
 button {
     margin-top: 15px;
     width: 100%;
@@ -35,14 +40,31 @@ button {
     cursor: pointer;
 }
 
+/* Effekt, wenn man mit der Maus über den Button fährt (Hover-Effekt) */
 button:hover {
     background: #005fa3;
 }
 
+/* Styling für Fehlermeldungen */
 .error {
     background: #ffdddd;
     border: 1px solid #ff8888;
     padding: 8px;
     margin-bottom: 10px;
     border-radius: 4px;
+}
+
+/* Styling für die Zeile mit der Checkbox im Regestrierungsfenster */
+.checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+/* Spezifisches Styling NUR für das Input-Feld (die Checkbox) innerhalb der .checkbox-row */
+.checkbox-row input {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
 }
