@@ -73,7 +73,7 @@ BEGIN
 EXCEPTION
 -- Wenn irgendein Fehler auftritt, brich ab und gib eine Fehlermeldung aus
 WHEN OTHERS THEN
-    RAISE_APPLICATION_ERROR(-20001, 'Fehler beim Insert in PERSON: ' || SQLERRM);
+    RAISE_APPLICATION_ERROR(-20001, 'Fehler: ' || SQLERRM);
 END;
 /
 
