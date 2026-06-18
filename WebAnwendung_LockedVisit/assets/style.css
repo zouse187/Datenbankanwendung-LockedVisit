@@ -1,7 +1,8 @@
 /* Styling für die gesamte Webseite */
 body {
     font-family: Arial, sans-serif;
-    background: #f4f4f4;
+    background: #000000;
+    color: #ffffff;
 }
 
 /* Styling für die Box, in der das Login-Formular liegt */
@@ -9,15 +10,17 @@ body {
     max-width: 380px;
     margin: 80px auto;
     padding: 20px;
-    background: white;
+    background: #2A2A2A;
     border-radius: 6px;
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    color: #ffffff;
 }
 
 /* Styling für die Beschriftungstexte (Labels) */
 label {
     display: block;
     margin-top: 10px;
+    color: #ffffff;
 }
 
 /* Styling für die Eingabefelder (z.B. E-Mail, Passwort) */
@@ -26,6 +29,8 @@ input {
     padding: 8px;
     margin-top: 4px;
     box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
 }
 
 /* Styling für Buttons */
@@ -33,7 +38,7 @@ button {
     margin-top: 15px;
     width: 100%;
     padding: 10px;
-    background: #007acc;
+    background: #FE731F;
     color: white;
     border: none;
     border-radius: 4px;
@@ -42,16 +47,17 @@ button {
 
 /* Effekt, wenn man mit der Maus über den Button fährt (Hover-Effekt) */
 button:hover {
-    background: #005fa3;
+    background: #d95f15;
 }
 
 /* Styling für Fehlermeldungen */
 .error {
-    background: #ffdddd;
-    border: 1px solid #ff8888;
+    background: rgba(254, 115, 31, 0.15);
+    border: 1px solid #FE731F;
     padding: 8px;
     margin-bottom: 10px;
     border-radius: 4px;
+    color: #ffffff;
 }
 
 /* Styling für die Zeile mit der Checkbox im Regestrierungsfenster */
@@ -67,4 +73,5 @@ button:hover {
     width: 18px;
     height: 18px;
     cursor: pointer;
+    accent-color: #FE731F;
 }
