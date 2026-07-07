@@ -128,3 +128,40 @@ EXCEPTION
         p_rolle := NULL;     -- Löscht eventuelle Rollen-Reste
 END;
 /
+
+-- Erstellt oder überschreibt die Prozedur für die Gefangenen, für die der Besucher validiert ist
+CREATE OR REPLACE PROCEDURE GET_VALIDIERTE_GEFANGENE (
+    p_person_id IN  NUMBER,           -- Die ID des aktuell eingeloggten Besuchers
+    p_cursor      OUT SYS_REFCURSOR     -- Ein System-Cursor, der die Ergebnismenge an PHP übergibt
+) AS
+    -- Eine interne Variable, um die ermittelte BESUCHER_ID kurzzeitig zu speichern
+    v_besucher_id NUMBER;
+BEGIN
+    -- Ermittle die BESUCHER_ID anhand der übergebenen PERSON_ID
+    SELECT besucher_id 
+    INTO v_besucher_id
+    FROM besucher 
+    WHERE person_id = p_person_id;
+
+    -- Öffne den Cursor mit der ermittelten v_besucher_id
+    OPEN p_cursor FOR
+        SELECT 
+            g.gefangener_id, 
+            p.vorname, 
+            p.nachname 
+        FROM validierte_besucher vb
+        -- Verbindet die Validierungstabelle über die GEFANGENER_ID mit der GEFANGENER-Tabelle
+        JOIN gefangener g ON vb.gefangener_id = g.gefangener_id
+        -- Verbindet den Gefangenen über seine PERSON_ID mit der PERSON-Tabelle, um Vor- und Nachnamen zu erhalten
+        JOIN person p     ON g.person_id = p.person_id
+        -- Filtert das Ergebnis so, dass nur Gefangene des aktuell übergebenen Besuchers geladen werden
+        WHERE vb.besucher_id = v_besucher_id;
+
+EXCEPTION
+    -- Falls für die PERSON_ID kein Eintrag in der BESUCHER-Tabelle existiert
+    WHEN NO_DATA_FOUND THEN
+        -- Öffnet einen leeren Cursor, damit PHP nicht abstürzt, sondern einfach 0 Zeilen erhält
+        OPEN p_cursor FOR 
+            SELECT NULL AS gefangener_id, NULL AS vorname, NULL AS nachname FROM dual WHERE 1=0;
+END GET_VALIDIERTE_GEFANGENE;
+/

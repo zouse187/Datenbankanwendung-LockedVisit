@@ -21,3 +21,15 @@ Manuel Borghardt (16.06.2026):
 	- public/dashboard_mitarbeiter.php
 	- controllers/user_login_check.php
 	- controllers/register_check.php
+
+Joel Jantschik (01.07.2026 - 07.07.2026):
+
+- Tabelle VALIDIERTE_BESUCHER erstellt, mit den Attributen BESUCHER_ID und GEFANGENER_ID. Um festzulegen, welcher Besucher welche Gefangenen besuchen kann, bzw. welche Gefangenen dem Besucher auf der Website angezeigt werden, nachdem er sich angemeldet hat. (Tabelle_VALIDIERTE_BESUCHER_erstellt.sql)
+- Die Stored Procedure "GET_VALIDIERTE_GEFANGENE" angelegt, die alle Gefangenen, die für den Besucher validiert sind zurückgibt. In Controllers/get_gefangene.php werden dann alle Gefangenen in einer while-Schleife in eine Menge gepackt und in public/dashboard_besucher.php wird die Menge dann ausgelesen. (Stored_Procedures.sql)
+- Datei Controllers/get_gefangene.php hinzugefügt
+- Datei public/dashboard_besucher.php angepasst
+- Datei assets/style.css angepasst
+
+
+
+
