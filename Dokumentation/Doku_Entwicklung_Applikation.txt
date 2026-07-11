@@ -32,8 +32,6 @@ Joel Jantschik (01.07.2026 - 07.07.2026):
 
 Joshua del Rosario Rijo (08.07.2026 - 10.07.2026):
 
-Besucher-Validierung implementiert
-
 - Tabelle BESUCHER_VALIDIERUNG erstellt, mit den Attributen BESUCHER_ID, GEFANGENER_ID und VALIDIERT. Dadurch kann ein Besucher für mehrere Gefangene validiert sein und man auf der Webseite als Besucher sehen kann für welche Gefangenen man validiert ist. (Tabelle_BESUCHER_VALIDIERUNG_erstellt.sql)
 - 3 Stored Procedures angelegt für den Validierungsprozess vom Besucher (Stored Procedures_2). "GET_GEFANGENE_FUER_VALIDIERUNG" sucht alle Gefangenen die besuchbar sind heraus und zeigt dann für welche Gefangenen der Besucher noch nicht validiert ist. "GET_OFFENE_VALIDIERUNGEN" checkt einfach nur welche Validierungsanträge noch offen sind. "VALIDIERUNGSANTRAG_STELLEN" Prüft ob ein Validierungsantrag für einen Gefangenen gestellt wurde und gibt eine Rückmeldung aus.
 - Datei Controllers/get_validierung_gefangene.php hinzugefügt
