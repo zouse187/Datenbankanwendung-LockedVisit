@@ -1,31 +1,35 @@
 -- Erstellt oder überschreibt die Prozedur zur Abfrage der Gefangenen für die Validierung
 CREATE OR REPLACE PROCEDURE GET_GEFANGENE_FUER_VALIDIERUNG (
-    p_person_id IN NUMBER,
-    p_cursor    OUT SYS_REFCURSOR
+   p_person_id IN NUMBER,
+   p_cursor    OUT SYS_REFCURSOR
 )
 AS
 BEGIN
-    -- Gefangene für das Auswahlmenü des Besuchers laden
-    OPEN p_cursor FOR
-        SELECT
-            g.GEFANGENER_ID,
-            p.VORNAME,
-            p.NACHNAME
-        FROM GEFANGENER g
-        JOIN PERSON p
-            ON p.PERSON_ID = g.PERSON_ID
-        -- Nur Gefangene anzeigen, die grundsätzlich besucht werden dürfen
-        WHERE g.BESUCHBAR = 1
-          -- Gefangene ausschließen, für die der Besucher bereits validiert ist
-          AND NOT EXISTS (
-              SELECT 1
-              FROM BESUCHER b
-              JOIN BESUCHER_VALIDIERUNG bv
-                  ON bv.BESUCHER_ID = b.BESUCHER_ID
-              WHERE b.PERSON_ID = p_person_id
-                AND bv.GEFANGENER_ID = g.GEFANGENER_ID
-          )
-        ORDER BY p.NACHNAME, p.VORNAME;
+   OPEN p_cursor FOR
+       SELECT
+           g.GEFANGENER_ID,
+           p.VORNAME,
+           p.NACHNAME
+       FROM GEFANGENER g
+       JOIN PERSON p ON p.PERSON_ID = g.PERSON_ID
+       WHERE g.BESUCHBAR = 1
+         -- Bedingung 1: Es läuft kein offener Antrag in BESUCHER_VALIDIERUNG
+         AND NOT EXISTS (
+             SELECT 1
+             FROM BESUCHER b
+             JOIN BESUCHER_VALIDIERUNG bv ON bv.BESUCHER_ID = b.BESUCHER_ID
+             WHERE b.PERSON_ID = p_person_id
+               AND bv.GEFANGENER_ID = g.GEFANGENER_ID
+         )
+         -- Bedingung 2: Man ist für diesen Gefangenen nicht schon validiert
+         AND NOT EXISTS (
+             SELECT 1
+             FROM BESUCHER b
+             JOIN VALIDIERTE_BESUCHER vb ON vb.BESUCHER_ID = b.BESUCHER_ID
+             WHERE b.PERSON_ID = p_person_id
+               AND vb.GEFANGENER_ID = g.GEFANGENER_ID
+         )
+       ORDER BY p.NACHNAME, p.VORNAME;
 END;
 /
 
@@ -67,76 +71,38 @@ CREATE OR REPLACE PROCEDURE VALIDIERUNGSANTRAG_STELLEN (
     p_gefangener_id IN NUMBER,
     p_ok            OUT NUMBER,
     p_meldung       OUT VARCHAR2
-)
-AS
-    v_besucher_id NUMBER(10);
-    v_anzahl      NUMBER;
+) AS
+    v_besucher_id NUMBER;
 BEGIN
     p_ok := 0;
 
-    -- Besucher-ID zur übergebenen Person ermitteln
-    SELECT BESUCHER_ID
-    INTO v_besucher_id
-    FROM BESUCHER
-    WHERE PERSON_ID = p_person_id;
+    -- 1. Zuerst die BESUCHER_ID zur eingeloggten Person finden
+    BEGIN
+        SELECT BESUCHER_ID INTO v_besucher_id
+        FROM BESUCHER
+        WHERE PERSON_ID = p_person_id;
+    EXCEPTION
+        WHEN NO_DATA_FOUND THEN
+            p_meldung := 'Fehler: Zu Ihrer Person-ID (' || p_person_id || ') wurde kein Besucher-Profil in der Tabelle BESUCHER gefunden.';
+            RETURN;
+    END;
 
-    -- Prüfen, ob der Gefangene besuchbar ist
-    SELECT COUNT(*)
-    INTO v_anzahl
-    FROM GEFANGENER
-    WHERE GEFANGENER_ID = p_gefangener_id
-      AND BESUCHBAR = 1;
-
-    IF v_anzahl = 0 THEN
-        p_meldung := 'Der Gefangene ist nicht verfügbar.';
-        RETURN;
-    END IF;
-
-    -- Prüfen, ob bereits ein Validierungsantrag besteht
-    SELECT COUNT(*)
-    INTO v_anzahl
-    FROM BESUCHER_VALIDIERUNG
-    WHERE BESUCHER_ID = v_besucher_id
-      AND GEFANGENER_ID = p_gefangener_id;
-
-    IF v_anzahl > 0 THEN
-        p_meldung := 'Für diesen Gefangenen besteht bereits ein Antrag.';
-        RETURN;
-    END IF;
-
-    -- Neuen Validierungsantrag speichern
-    INSERT INTO BESUCHER_VALIDIERUNG (
-        BESUCHER_ID,
-        GEFANGENER_ID,
-        VALIDIERT
-    )
-    VALUES (
-        v_besucher_id,
-        p_gefangener_id,
-        0
-    );
+    -- 2. Den Antrag in den "Warteraum" eintragen
+    INSERT INTO BESUCHER_VALIDIERUNG (BESUCHER_ID, GEFANGENER_ID)
+    VALUES (v_besucher_id, p_gefangener_id);
 
     COMMIT;
-
-    -- Erfolgsmeldung zurückgeben
     p_ok := 1;
-    p_meldung := 'Der Validierungsantrag wurde gestellt.';
+    p_meldung := 'Der Validierungsantrag wurde erfolgreich gesendet!';
 
 EXCEPTION
-    -- Fehler behandeln und Änderungen zurücksetzen
-    WHEN NO_DATA_FOUND THEN
-        ROLLBACK;
-        p_ok := 0;
-        p_meldung := 'Zu dieser Person wurde kein Besucher gefunden.';
-
     WHEN DUP_VAL_ON_INDEX THEN
         ROLLBACK;
         p_ok := 0;
-        p_meldung := 'Dieser Antrag besteht bereits.';
-
+        p_meldung := 'Sie haben für diesen Gefangenen bereits einen Antrag gestellt.';
     WHEN OTHERS THEN
         ROLLBACK;
         p_ok := 0;
-        p_meldung := 'Der Antrag konnte nicht gespeichert werden.';
+        p_meldung := 'Datenbankfehler: ' || SQLERRM;
 END;
 /

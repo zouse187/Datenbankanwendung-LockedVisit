@@ -40,4 +40,15 @@ Joshua del Rosario Rijo (08.07.2026 - 10.07.2026):
 - Datei public/dashboard_besucher.php angepasst
 - Datei assets/style.css angepasst
 
+Leonid Nikkel (11.07.2026):
 
+-Tabelle GEFANGENEN_SLOTS erstellt, mit den Attributen SLOT_ID, GEFANGENER_ID, WOCHENTAG und UHRZEIT. Dadurch können individuelle und feste Besuchsfenster für jeden einzelnen Häftling in der Datenbank festgelegt werden. (Tabelle_GEFANGENEN_SLOTS_erstellt.sql)
+-2 Stored Procedures für den Terminbuchungs- und Genehmigungsprozess angelegt (Stored_Procedures_3.sql). "TERMIN_BUCHEN" prüft die Verfügbarkeit anhand der Slots und speichert den Termin in der Tabelle BESUCHSZEITEN. "ANTRAG_ENTSCHEIDEN" verarbeitet das Approval-Workflow-Pattern für JVA-Mitarbeiter (Verschiebung genehmigter Anträge in VALIDIERTE_BESUCHER, Löschung abgelehnter Anträge).
+-Bestehende Stored Procedures "GET_GEFANGENE_FUER_VALIDIERUNG" und "VALIDIERUNGSANTRAG_STELLEN" optimiert, um ID-Übersetzungen (PERSON_ID zu BESUCHER_ID) abzufangen und genaueres Filtern bereits gestellter Anträge zu gewährleisten.
+-Fehlerbehandlung im PHP-Backend verbessert, um echte Oracle-Fehlermeldungen abzufangen und direkt im Dashboard anzuzeigen.
+-Datei Controllers/termin_buchen.php hinzugefügt
+-Datei Controllers/antrag_bearbeiten.php hinzugefügt
+-Datei Controllers/get_offene_validierungen.php angepasst
+-Datei Controllers/validation_request.php angepasst
+-Datei public/dashboard_besucher.php umfassend überarbeitet: Layout in logische Bereiche gegliedert, TomSelect für eine Live-Gefangenensuche eingebaut und eine dynamische Terminvergabe implementiert, die über ein Dropdown-Menü nur die exakt verfügbaren, noch nicht belegten Besuchsfenster der nächsten 14 Tage anzeigt.
+-Datei public/dashboard_mitarbeiter.php funktional erweitert, um eingehende Validierungsanträge anzuzeigen und diese über "Genehmigen" und "Ablehnen" Schaltflächen zu verarbeiten.

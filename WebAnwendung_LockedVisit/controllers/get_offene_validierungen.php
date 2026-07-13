@@ -74,7 +74,9 @@ if (!$connResult['success']) {
             $offeneValidierungen[] = $row;
         }
     } else {
-        $db_error = 'Die offenen Validierungsanträge konnten nicht geladen werden.';
+        $e = oci_error($stid);
+        if (!$e) { $e = oci_error($conn); }
+        $db_error = 'Oracle-Fehler: ' . $e['message'];
     }
 
     // Gibt die verwendeten Oracle-Ressourcen wieder frei
