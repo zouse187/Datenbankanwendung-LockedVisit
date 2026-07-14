@@ -17,8 +17,3 @@ CREATE TABLE VALIDIERTE_BESUCHER (
     -- Zusammengesetzter Primärschlüssel, damit eine Kombination nur einmal existiert
     PRIMARY KEY (BESUCHER_ID, GEFANGENER_ID)
 );
-
-select * from besucher;
-
-INSERT INTO VALIDIERTE_BESUCHER (BESUCHER_ID, GEFANGENER_ID)
-VALUES (4207, 6005);

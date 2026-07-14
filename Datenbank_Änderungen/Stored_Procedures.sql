@@ -129,10 +129,11 @@ EXCEPTION
 END;
 /
 
+
 -- Erstellt oder überschreibt die Prozedur für die Gefangenen, für die der Besucher validiert ist
 CREATE OR REPLACE PROCEDURE GET_VALIDIERTE_GEFANGENE (
     p_person_id IN  NUMBER,           -- Die ID des aktuell eingeloggten Besuchers
-    p_cursor      OUT SYS_REFCURSOR     -- Ein System-Cursor, der die Ergebnismenge an PHP übergibt
+    p_cursor    OUT SYS_REFCURSOR     -- Ein System-Cursor, der die Ergebnismenge an PHP übergibt
 ) AS
     -- Eine interne Variable, um die ermittelte BESUCHER_ID kurzzeitig zu speichern
     v_besucher_id NUMBER;
@@ -164,4 +165,200 @@ EXCEPTION
         OPEN p_cursor FOR 
             SELECT NULL AS gefangener_id, NULL AS vorname, NULL AS nachname FROM dual WHERE 1=0;
 END GET_VALIDIERTE_GEFANGENE;
+/
+
+
+
+-- Erstellt oder überschreibt die Prozedur zur Abfrage der Gefangenen für die Validierung
+CREATE OR REPLACE PROCEDURE GET_GEFANGENE_FUER_VALIDIERUNG (
+   p_person_id IN NUMBER,
+   p_cursor    OUT SYS_REFCURSOR
+)
+AS
+BEGIN
+   OPEN p_cursor FOR
+       SELECT
+           g.GEFANGENER_ID,
+           p.VORNAME,
+           p.NACHNAME
+       FROM GEFANGENER g
+       JOIN PERSON p ON p.PERSON_ID = g.PERSON_ID
+       WHERE g.BESUCHBAR = 1
+         -- Bedingung 1: Es läuft kein offener Antrag in VALIDIERUNGSANTRAG
+         AND NOT EXISTS (
+             SELECT 1
+             FROM BESUCHER b
+             JOIN VALIDIERUNGSANTRAG bv ON bv.BESUCHER_ID = b.BESUCHER_ID
+             WHERE b.PERSON_ID = p_person_id
+               AND bv.GEFANGENER_ID = g.GEFANGENER_ID
+         )
+         -- Bedingung 2: Man ist für diesen Gefangenen nicht schon validiert
+         AND NOT EXISTS (
+             SELECT 1
+             FROM BESUCHER b
+             JOIN VALIDIERTE_BESUCHER vb ON vb.BESUCHER_ID = b.BESUCHER_ID
+             WHERE b.PERSON_ID = p_person_id
+               AND vb.GEFANGENER_ID = g.GEFANGENER_ID
+         )
+       ORDER BY p.NACHNAME, p.VORNAME;
+END;
+/
+
+
+
+-- Erstellt oder überschreibt die Prozedur zur Abfrage der offenen Validierungsanträge
+CREATE OR REPLACE PROCEDURE GET_OFFENE_VALIDIERUNGEN (
+    p_person_id IN NUMBER,
+    p_cursor    OUT SYS_REFCURSOR
+)
+AS
+BEGIN
+    -- Cursor mit allen offenen Validierungsanträgen öffnen
+    OPEN p_cursor FOR
+        -- Gefangene ermitteln, für die der Besucher noch nicht validiert wurde
+        SELECT
+            g.GEFANGENER_ID,
+            p.VORNAME,
+            p.NACHNAME
+        FROM BESUCHER b
+        JOIN VALIDIERUNGSANTRAG bv
+            ON bv.BESUCHER_ID = b.BESUCHER_ID
+        JOIN GEFANGENER g
+            ON g.GEFANGENER_ID = bv.GEFANGENER_ID
+        JOIN PERSON p
+            ON p.PERSON_ID = g.PERSON_ID
+        -- Nur noch nicht bestätigte Validierungsanträge anzeigen
+        WHERE b.PERSON_ID = p_person_id
+          AND bv.VALIDIERT = 0
+        ORDER BY p.NACHNAME, p.VORNAME;
+END;
+/
+
+
+
+-- Erstellt oder überschreibt die Prozedur zur Beantragung der Validierung
+CREATE OR REPLACE PROCEDURE VALIDIERUNGSANTRAG_STELLEN (
+    p_person_id     IN NUMBER,
+    p_gefangener_id IN NUMBER,
+    p_ok            OUT NUMBER,
+    p_meldung       OUT VARCHAR2
+) AS
+    v_besucher_id NUMBER;
+BEGIN
+    p_ok := 0;
+
+    -- 1. Zuerst die BESUCHER_ID zur eingeloggten Person finden
+    BEGIN
+        SELECT BESUCHER_ID INTO v_besucher_id
+        FROM BESUCHER
+        WHERE PERSON_ID = p_person_id;
+    EXCEPTION
+        WHEN NO_DATA_FOUND THEN
+            p_meldung := 'Fehler: Zu Ihrer Person-ID (' || p_person_id || ') wurde kein Besucher-Profil in der Tabelle BESUCHER gefunden.';
+            RETURN;
+    END;
+
+    -- 2. Den Antrag in den "Warteraum" eintragen
+    INSERT INTO VALIDIERUNGSANTRAG (BESUCHER_ID, GEFANGENER_ID)
+    VALUES (v_besucher_id, p_gefangener_id);
+
+    COMMIT;
+    p_ok := 1;
+    p_meldung := 'Der Validierungsantrag wurde erfolgreich gesendet!';
+
+EXCEPTION
+    WHEN DUP_VAL_ON_INDEX THEN
+        ROLLBACK;
+        p_ok := 0;
+        p_meldung := 'Sie haben für diesen Gefangenen bereits einen Antrag gestellt.';
+    WHEN OTHERS THEN
+        ROLLBACK;
+        p_ok := 0;
+        p_meldung := 'Datenbankfehler: ' || SQLERRM;
+END;
+/
+
+
+-- Erstellt oder überschreibt die Prozedur zur Terminbuchung
+CREATE OR REPLACE PROCEDURE TERMIN_BUCHEN (
+    p_person_id     IN NUMBER,
+    p_gefangener_id IN NUMBER,
+    p_datum_str     IN VARCHAR2, 
+    p_ok            OUT NUMBER,  
+    p_meldung       OUT VARCHAR2 
+)
+AS
+    v_anzahl        NUMBER;
+    v_besucht_count NUMBER;
+    v_slot_erlaubt  NUMBER;
+    v_neu_id        NUMBER;
+    v_datum         DATE;
+    v_uhrzeit_str   VARCHAR2(5);
+    v_wochentag     NUMBER;
+BEGIN
+    p_ok := 0;
+
+    -- String in Oracle-DATE konvertieren
+    v_datum := TO_DATE(p_datum_str, 'YYYY-MM-DD HH24:MI:SS');
+
+    -- Wochentag (1=Mo, 5=Fr) und Uhrzeit ('HH24:MI') ermitteln
+    v_wochentag := TRUNC(v_datum) - TRUNC(v_datum, 'IW') + 1;
+    v_uhrzeit_str := TO_CHAR(v_datum, 'HH24:MI');
+
+    /* 1) Prüfen, ob für diesen Gefangenen genau dieses Besuchsfenster existiert */
+    SELECT COUNT(*)
+    INTO v_slot_erlaubt
+    FROM GEFANGENEN_SLOTS
+    WHERE GEFANGENER_ID = p_gefangener_id
+      AND WOCHENTAG = v_wochentag
+      AND UHRZEIT = v_uhrzeit_str;
+
+    IF v_slot_erlaubt = 0 THEN
+        p_meldung := 'Dieser Gefangene hat zu dieser Zeit kein reguläres Besuchsfenster.';
+        RETURN;
+    END IF;
+
+    /* 2) Schritt 8: Prüfen, ob der Gefangene generell besuchbar ist */
+    SELECT COUNT(*)
+    INTO v_anzahl
+    FROM GEFANGENER
+    WHERE GEFANGENER_ID = p_gefangener_id
+      AND BESUCHBAR = 1;
+
+    IF v_anzahl = 0 THEN
+        p_meldung := 'Der Gefangene darf aktuell keinen Besuch empfangen.';
+        RETURN;
+    END IF;
+
+    /* 3) Schritt 9: Prüfen, ob der Slot bereits durch eine andere Buchung belegt ist */
+    SELECT COUNT(*)
+    INTO v_besucht_count
+    FROM BESUCHSZEITEN
+    WHERE GEFANGENER_ID = p_gefangener_id
+      AND DATUM = v_datum;
+
+    IF v_besucht_count > 0 THEN
+        p_meldung := 'Dieser Terminslot ist für den Gefangenen bereits vergeben.';
+        RETURN;
+    END IF;
+
+    /* 4) Schritt 10: Termin buchen */
+    SELECT NVL(MAX(BESUCHSZEITEN_ID), 0) + 1
+    INTO v_neu_id
+    FROM BESUCHSZEITEN;
+
+    INSERT INTO BESUCHSZEITEN (BESUCHSZEITEN_ID, PERSON_ID, GEFANGENER_ID, DATUM)
+    VALUES (v_neu_id, p_person_id, p_gefangener_id, v_datum);
+
+    COMMIT;
+
+    p_ok := 1;
+    p_meldung := 'Termin wurde erfolgreich gebucht!';
+
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        p_ok := 0;
+        p_meldung := 'Der Termin konnte nicht gespeichert werden: ' || SQLERRM;
+END;
 /
