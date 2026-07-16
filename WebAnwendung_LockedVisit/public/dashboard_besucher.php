@@ -88,6 +88,7 @@ $conn = $connResult['success'] ? $connResult['conn'] : null;
 
         <div class="dashboard-section" style="margin-top: 20px; padding: 15px; background: #333; border-radius: 4px;">
             <h2>Gefangene, für die Sie validiert sind</h2>
+        
         <?php if (empty($gefangene)): ?>
             <div class="info-box" style="background: rgba(254, 115, 31, 0.1); border-left: 4px solid #FE731F; padding: 10px;">
                 Hinweis: Sie müssen sich zuerst für einen Gefangenen validieren lassen oder auf die Freigabe warten.
@@ -100,66 +101,21 @@ $conn = $connResult['success'] ? $connResult['conn'] : null;
                             <?php echo htmlspecialchars($g['VORNAME'] . ' ' . $g['NACHNAME']); ?>
                             <span class="status-validiert" style="margin-left: auto;">Berechtigt</span>
                         </summary>
+                        
                         <div class="gefangene-box-inhalt" style="padding-top: 10px;">
                             <?php
                             $g_id = (int)$g['GEFANGENER_ID'];
                             
-                            // 1. Erlaubte Besuchsfenster aus der neuen Tabelle auslesen
-                            $erlaubteSlots = [];
-                            if ($conn) {
-                                $stmtSlots = oci_parse($conn, "SELECT WOCHENTAG, UHRZEIT FROM GEFANGENEN_SLOTS WHERE GEFANGENER_ID = :p_g_id");
-                                oci_bind_by_name($stmtSlots, ':p_g_id', $g_id);
-                                oci_execute($stmtSlots);
-                                while ($sRow = oci_fetch_assoc($stmtSlots)) {
-                                    $erlaubteSlots[(int)$sRow['WOCHENTAG']][] = $sRow['UHRZEIT'];
-                                }
-                                oci_free_statement($stmtSlots);
-                            }
-
-                            // 2. Bereits vergebene Buchungen dieses Gefangenen laden
-                            $gebucht = [];
-                            if ($conn) {
-                                $stmtBesetzt = oci_parse($conn, "SELECT TO_CHAR(DATUM, 'YYYY-MM-DD HH24:MI') AS GEBUCHT_AM FROM BESUCHSZEITEN WHERE GEFANGENER_ID = :p_g_id");
-                                oci_bind_by_name($stmtBesetzt, ':p_g_id', $g_id);
-                                oci_execute($stmtBesetzt);
-                                while ($bRow = oci_fetch_assoc($stmtBesetzt)) {
-                                    $gebucht[] = $bRow['GEBUCHT_AM'];
-                                }
-                                oci_free_statement($stmtBesetzt);
-                            }
-
-                            // 3. Dropdown-Optionen für die nächsten 14 Tage generieren
-                            $dropdownOptions = "";
-                            $hatUeberhauptSlots = !empty($erlaubteSlots);
-
-                            if ($hatUeberhauptSlots) {
-                                for ($i = 1; $i <= 14; $i++) {
-                                    $date = new DateTime("+$i days");
-                                    $wochentagISO = (int)$date->format('N');
-
-                                    if (isset($erlaubteSlots[$wochentagISO])) {
-                                        foreach ($erlaubteSlots[$wochentagISO] as $uhrzeit) {
-                                            $dbFormat = $date->format('Y-m-d') . ' ' . $uhrzeit;
-                                            $valueFormat = $date->format('Y-m-d') . 'T' . $uhrzeit;
-
-                                            if (in_array($dbFormat, $gebucht)) {
-                                                $dropdownOptions .= "<option disabled>❌ " . $date->format('d.m.Y') . " um " . $uhrzeit . " Uhr (Bereits belegt)</option>";
-                                            } else {
-                                                $dropdownOptions .= "<option value=\"$valueFormat\">✅ " . $date->format('d.m.Y') . " um " . $uhrzeit . " Uhr</option>";
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                            include '../controllers/get_termine.php'; 
                             ?>
 
                             <?php if (!$hatUeberhauptSlots || empty($dropdownOptions)): ?>
-                                <p style="color: #ccc; font-style: italic;">Für diesen Gefangenen sind aktuell keine Besuchszeiten im System hinterlegt.</p>
+                                <p style="color: #ccc; font-style: italic;">Dieser Gefangener ist zur Zeit leider nicht besuchbar.</p>
                             <?php else: ?>
                                 <form action="../controllers/termin_buchen.php" method="post" style="border-top: 1px solid #444; padding-top: 10px;">
                                     <input type="hidden" name="gefangener_id" value="<?php echo $g_id; ?>">
                                     
-                                    <label for="datum_<?php echo $g_id; ?>" style="margin-bottom: 5px; display:block;">Verfügbare Termine (Live aus der JVA-Planung):</label>
+                                    <label for="datum_<?php echo $g_id; ?>" style="margin-bottom: 5px; display:block;">Verfügbare Termine:</label>
                                     
                                     <select id="datum_<?php echo $g_id; ?>" name="datum" required style="margin-bottom: 12px; background: #ffffff; color: #000000; padding: 8px; border-radius: 4px; border: 1px solid #ccc; width: 100%; box-sizing: border-box;">
                                         <option value="" selected disabled>Bitte Termin auswählen...</option>
@@ -169,7 +125,13 @@ $conn = $connResult['success'] ? $connResult['conn'] : null;
                                     <button type="submit" style="background: #32b450; width: 100%; padding: 10px; color: white; border: none; border-radius: 4px; cursor: pointer;">Termin verbindlich buchen</button>
                                 </form>
                             <?php endif; ?>
-                        </div> </details> <?php endforeach; ?> </div> <?php endif; ?> <a href="user_logout.php" class="logout-link">Logout</a>
+                        </div> 
+                    </details> 
+                <?php endforeach; ?> 
+            </div> 
+        <?php endif; ?> 
+        
+        <a href="user_logout.php" class="logout-link">Logout</a>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>

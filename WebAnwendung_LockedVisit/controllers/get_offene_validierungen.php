@@ -40,7 +40,7 @@ if (!$connResult['success']) {
     // Bereitet den Aufruf der Stored Procedure vor
     $sql = '
         BEGIN
-            GET_OFFENE_VALIDIERUNGEN(
+            GET_OFFENE_VALIDIERUNGSANTRAEGE(
                 :p_person_id,
                 :p_cursor
             );

@@ -40,7 +40,7 @@ if (!$connResult['success']) {
     // Bereitet den Aufruf der Stored Procedure vor
     $sql = '
         BEGIN
-            GET_GEFANGENE_FUER_VALIDIERUNG(
+            GET_NICHT_VALIDIERTE_GEFANGENE(
                 :p_person_id,
                 :p_cursor
             );

@@ -52,3 +52,17 @@ Leonid Nikkel (11.07.2026):
 -Datei Controllers/validation_request.php angepasst
 -Datei public/dashboard_besucher.php umfassend überarbeitet: Layout in logische Bereiche gegliedert, TomSelect für eine Live-Gefangenensuche eingebaut und eine dynamische Terminvergabe implementiert, die über ein Dropdown-Menü nur die exakt verfügbaren, noch nicht belegten Besuchsfenster der nächsten 14 Tage anzeigt.
 -Datei public/dashboard_mitarbeiter.php funktional erweitert, um eingehende Validierungsanträge anzuzeigen und diese über "Genehmigen" und "Ablehnen" Schaltflächen zu verarbeiten.
+
+Manuel Borghardt (16.07.2026):
+
+Die Website an sich hat zwar funktioniert. Jedoch war die Benennung einiger Proceduren und Tabellen echt schlecht gewählt, weshalb ich folgende Proceduren und Tabellen umbenannt habe:
+	Proceduren:
+	- GET_GEFANGENE_FUER_VALIDIERUNG -> GET_NICHT_VALIDIERTE_GEFANGENE
+	- GET_OFFENE_VALIDIERUNGEN       -> GET_OFFENE_VALIDIERUNGSANTRAEGE
+
+	Tabellen:
+	- BESUCHER_VALIDIERUNG -> VALIDIERUNGSANTRAG
+
+Und die beiden Tabellen BESUCHSZEITEN und GEFANGENER_SLOTS habe ich gelöscht, weil ich die Implementierung der Termin-Buchung geändert habe. Vorher wurden alle freien Termine in GEFANGENER_SLOTS gespeichert und alle belegten Termine in BESUCHSZEITEN. Das war nicht so ganz sinnig und die Namen waren total unpassend. Das Problem habe ich gelöts, indem ich eine Tabelle gemacht habe mit den Namen GEFANGENEN_TERMINE. Dort haben alle Termine die Spalte GEBUCHT, die entweder auf 1 oder 0 ist. Das heißt die Tabelle wird mit der Stored Procedure geupdatet, statt dass in zwei Tabellen die Termine drinne stehen.
+
+Und ich habe die Procedure GET_GEFANGENEN_TERMINE und die Datei Controllers/get_termine.php hinzugefügt. Diese Procedure holt alle Termine für die Gefangenen, für die man validiert ist. Diese Termine werden dann ins drop down gepackt. Vorher wurde das mit SELECTS im frontend code (public-Ordner) gemacht. Jetzt wie gewünscht mit einer Procedure und im backend code (controllers-Ordner).

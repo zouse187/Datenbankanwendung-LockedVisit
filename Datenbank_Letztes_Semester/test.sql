@@ -1,16 +1,3 @@
-CREATE TABLE MESSAGES (
-    results NUMBER(3)
-);
+select * from besucher;
 
-BEGIN
-    FOR i in 1..10 LOOP
-        IF i != 6 AND i != 8 THEN
-            INSERT INTO MESSAGES(RESULTS)
-            VALUES(i);
-        END IF;
-    END LOOP;
-END;
-
-SELECT * FROM MESSAGES;
-
-DROP TABLE MESSAGES;
+DROP TABLE VALIDIERUNG; COMMIT;
