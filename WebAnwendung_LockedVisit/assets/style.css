@@ -218,3 +218,70 @@ select {
         flex-direction: column;
     }
 }
+
+/* Spezifische Anpassungen für die Tabelle im Mitarbeiter-Dashboard */
+table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    margin-top: 15px; 
+    background: #2A2A2A; 
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+th, td { 
+    padding: 12px; 
+    border: 1px solid #4a4a4a; 
+    text-align: left; 
+    color: #ffffff;
+}
+
+th { 
+    background-color: #333333; 
+    color: #FE731F; 
+    font-weight: bold;
+    border-bottom: 2px solid #FE731F;
+}
+
+tr:nth-child(even) { 
+    background-color: #222222; 
+}
+
+/* Buttons für die Aktionen (Annehmen / Ablehnen) */
+.btn-green { 
+    background: #32b450; 
+    color: white; 
+    border: none; 
+    padding: 8px 14px; 
+    cursor: pointer; 
+    border-radius: 4px; 
+    font-weight: bold;
+    margin-top: 0; 
+    width: auto;
+}
+
+.btn-red { 
+    background: #dc3545; 
+    color: white; 
+    border: none; 
+    padding: 8px 14px; 
+    cursor: pointer; 
+    border-radius: 4px; 
+    margin-left: 5px; 
+    font-weight: bold;
+    margin-top: 0; 
+    width: auto;
+}
+
+.btn-green:hover { 
+    background: #289341; 
+}
+
+.btn-red:hover { 
+    background: #bd2130; 
+}
+
+.action-form {
+    margin: 0; 
+    display: flex;
+}

@@ -343,3 +343,72 @@ EXCEPTION
         p_meldung := 'Fehler bei der Buchung: ' || SQLERRM;
 END;
 /
+
+
+-- Erstellt oder überschreibt die Prozedur zur Anzeigen der Anträge
+CREATE OR REPLACE PROCEDURE GET_OFFENE_ANTRAEGE (
+    p_cursor OUT SYS_REFCURSOR
+) AS
+BEGIN
+    OPEN p_cursor FOR
+        SELECT va.BESUCHER_ID,
+               va.GEFANGENER_ID,
+               -- Besucher-Name aus PERSON holen
+               p_bes.VORNAME || ' ' || p_bes.NACHNAME AS BESUCHER_NAME,
+               -- Gefangenen-Name ebenfalls aus PERSON holen (über GEFANGENER)
+               p_gef.VORNAME || ' ' || p_gef.NACHNAME AS GEFANGENER_NAME
+          FROM VALIDIERUNGSANTRAG va
+          JOIN BESUCHER b   ON va.BESUCHER_ID = b.BESUCHER_ID
+          JOIN PERSON p_bes ON b.PERSON_ID = p_bes.PERSON_ID
+          JOIN GEFANGENER g ON va.GEFANGENER_ID = g.GEFANGENER_ID
+          JOIN PERSON p_gef ON g.PERSON_ID = p_gef.PERSON_ID
+         WHERE va.VALIDIERT = 0
+         ORDER BY p_bes.NACHNAME ASC;
+END;
+/
+
+-- Erstellt oder überschreibt die Prozedur zur Bearbeitung der Anträge
+CREATE OR REPLACE PROCEDURE VALIDIERUNGSANTRAG_BEARBEITEN (
+    p_besucher_id   IN  NUMBER,
+    p_gefangener_id IN  NUMBER,
+    p_entscheidung  IN  NUMBER, -- 1 = Annehmen, 0 = Ablehnen
+    p_ok            OUT NUMBER,
+    p_meldung       OUT VARCHAR2
+) AS
+BEGIN
+    p_ok := 0;
+
+    IF p_entscheidung = 1 THEN
+        -- FALL A: ANNEHMEN
+        INSERT INTO VALIDIERTE_BESUCHER (BESUCHER_ID, GEFANGENER_ID)
+        VALUES (p_besucher_id, p_gefangener_id);
+        
+        UPDATE VALIDIERUNGSANTRAG
+           SET VALIDIERT = 1
+         WHERE BESUCHER_ID = p_besucher_id
+           AND GEFANGENER_ID = p_gefangener_id;
+           
+        p_meldung := 'Der Antrag wurde erfolgreich angenommen und validiert.';
+        
+    ELSIF p_entscheidung = 0 THEN
+        -- FALL B: ABLEHNEN
+        DELETE FROM VALIDIERUNGSANTRAG
+         WHERE BESUCHER_ID = p_besucher_id
+           AND GEFANGENER_ID = p_gefangener_id;
+           
+        p_meldung := 'Der Antrag wurde abgelehnt und gelöscht.';
+    ELSE
+        p_meldung := 'Ungültige Entscheidung übergeben.';
+        RETURN;
+    END IF;
+
+    COMMIT;
+    p_ok := 1;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        p_ok := 0;
+        p_meldung := 'Fehler bei der Bearbeitung: ' || SQLERRM;
+END;
+/

@@ -66,3 +66,21 @@ Die Website an sich hat zwar funktioniert. Jedoch war die Benennung einiger Proc
 Und die beiden Tabellen BESUCHSZEITEN und GEFANGENER_SLOTS habe ich gelöscht, weil ich die Implementierung der Termin-Buchung geändert habe. Vorher wurden alle freien Termine in GEFANGENER_SLOTS gespeichert und alle belegten Termine in BESUCHSZEITEN. Das war nicht so ganz sinnig und die Namen waren total unpassend. Das Problem habe ich gelöts, indem ich eine Tabelle gemacht habe mit den Namen GEFANGENEN_TERMINE. Dort haben alle Termine die Spalte GEBUCHT, die entweder auf 1 oder 0 ist. Das heißt die Tabelle wird mit der Stored Procedure geupdatet, statt dass in zwei Tabellen die Termine drinne stehen.
 
 Und ich habe die Procedure GET_GEFANGENEN_TERMINE und die Datei Controllers/get_termine.php hinzugefügt. Diese Procedure holt alle Termine für die Gefangenen, für die man validiert ist. Diese Termine werden dann ins drop down gepackt. Vorher wurde das mit SELECTS im frontend code (public-Ordner) gemacht. Jetzt wie gewünscht mit einer Procedure und im backend code (controllers-Ordner).
+
+
+Joel Jantschik, Manuel Borghardt (19.07.2026)
+
+Mitarbeiterprozess zum bearbeiten der Validereungsanträge hinzugefügt.
+	Proceduren:
+	- GET_OFFENE_ANTRAEGE
+	- VALIDIERUNGSANTRAG_BEARBEITEN
+
+Zudem haben wir eine neue Dateie hinzugefügt und zwei bearbeitet.
+	Neu:
+	- antrag_bearbeiten.php
+	Darin werden die beiden neuen stored procedures ausgeführt.
+
+	Bearbeitet:
+	- style.css
+	- dashboard_mitarbeiter.php
+	In "dashboard[...].php" werden die Validerungsanträge in der Tabelle, auf der Website, hinzugefügt/ bzw. angezeigt.
