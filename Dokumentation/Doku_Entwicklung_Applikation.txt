@@ -1,3 +1,15 @@
+Joshua del Rosario Rijo (08.05.2026)
+- Tabelle BESUCHSZEITEN erstellt mit den Attributen BESUCHSZEITEN_ID, PERSON_ID, BESUCHER_ID, GEFANGENER_ID, ANWALT_ID, GEFANGENENNAME und DATUM. Damit können Besucher Termine für Gefangene buchen. (BESUCHSZEITEN.sql)
+- Tabelle GEFANGENER bearbeitet. Attribut BESUCHBAR hinzugefügt, um zeigen zu können, welche der Gefangenen besucht werden können.
+- Tabelle BESUCHER bearbeitet. Attribut VALIDIERT hinzugefügt, um zeigen zu können, welcher Besucher bereits validiert ist.
+
+Joshua del Rosario Rijo (24.05.2026)
+- 4 Views angelegt um die Abfragen für den Prozess der Terminbuchung zu vereinfachen.
+	- "V_BESUCHSZEITEN_DETAILS" für die Daten der Termine
+	- "V_BUCHBARE_GEFANGENE" damit man sehen kann, welche der Gefangenen besucht werden können um einen Termin zu buchen
+	- "V_BESUCHSZEITEN_PRO_GEFANGENER" hat die selben Daten wie V_BESUCHSZEITEN_DETAILS fällt also weg
+	- "V_VALIDIERTE_BESUCHER" sucht alle validierten Besucher raus
+
 Alle (10.06.2026):
 
 - Folgende Dateien für die Website erstellt, damit man für den Anfang eine funktionierende Oberfläche hat, in der man sich mit der Datenbank verbinden kann:
@@ -32,8 +44,8 @@ Joel Jantschik (01.07.2026 - 07.07.2026):
 
 Joshua del Rosario Rijo (08.07.2026 - 10.07.2026):
 
-- Tabelle BESUCHER_VALIDIERUNG erstellt, mit den Attributen BESUCHER_ID, GEFANGENER_ID und VALIDIERT. Dadurch kann ein Besucher für mehrere Gefangene validiert sein und man auf der Webseite als Besucher sehen kann für welche Gefangenen man validiert ist. (Tabelle_BESUCHER_VALIDIERUNG_erstellt.sql)
-- 3 Stored Procedures angelegt für den Validierungsprozess vom Besucher (Stored Procedures_2). "GET_GEFANGENE_FUER_VALIDIERUNG" sucht alle Gefangenen die besuchbar sind heraus und zeigt dann für welche Gefangenen der Besucher noch nicht validiert ist. "GET_OFFENE_VALIDIERUNGEN" checkt einfach nur welche Validierungsanträge noch offen sind. "VALIDIERUNGSANTRAG_STELLEN" Prüft ob ein Validierungsantrag für einen Gefangenen gestellt wurde und gibt eine Rückmeldung aus.
+- Tabelle BESUCHER_VALIDIERUNG erstellt, mit den Attributen BESUCHER_ID, GEFANGENER_ID und VALIDIERT. Dadurch kann ein Besucher für mehrere Gefangene validiert sein, was man alleine durch das Attribut VALIDIERT aus der Tabelle BESUCHER nicht darstellen konnte. (Tabelle_BESUCHER_VALIDIERUNG_erstellt.sql)
+- 3 Stored Procedures angelegt für den Validierungsprozess vom Besucher (Stored Procedures_2). "GET_GEFANGENE_FUER_VALIDIERUNG" sucht alle Gefangenen die besuchbar sind heraus und zeigt dann für welche Gefangenen der Besucher noch nicht validiert ist. "GET_OFFENE_VALIDIERUNGEN" checkt welche Validierungsanträge noch offen sind und zeigt diese an. "VALIDIERUNGSANTRAG_STELLEN" prüft ob ein Validierungsantrag für einen Gefangenen gestellt wurde und gibt eine Rückmeldung aus.
 - Datei Controllers/get_validierung_gefangene.php hinzugefügt
 - Datei Controllers/get_offene_validierungen.php hinzugefügt
 - Datei Controllers/validation_request.php hinzugefügt
