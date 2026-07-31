@@ -30,5 +30,5 @@ session_start();
             <button type="submit">Verbinden</button>
         </form>
     </div>
-</body>
+</body> 
 </html>

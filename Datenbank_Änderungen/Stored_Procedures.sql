@@ -412,3 +412,23 @@ EXCEPTION
         p_meldung := 'Fehler bei der Bearbeitung: ' || SQLERRM;
 END;
 /
+
+-- Erstellt oder überschreibt die Prozedur zum Ändern des Besuchbar-Status
+CREATE OR REPLACE PROCEDURE UPDATE_BESUCHBAR_STATUS (
+    p_gefangener_id IN NUMBER,
+    p_neuer_status  IN NUMBER  -- Nimmt 1 (Besuchbar) oder 0 (Nicht besuchbar) entgegen
+) AS
+BEGIN
+    -- Aktualisiert die Spalte BESUCHBAR in der Tabelle GEFANGENER
+    UPDATE GEFANGENER
+    SET BESUCHBAR = p_neuer_status
+    WHERE GEFANGENER_ID = p_gefangener_id;
+
+    -- Änderungen in Oracle dauerhaft speichern
+    COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        RAISE_APPLICATION_ERROR(-20002, 'Fehler beim Aktualisieren des Status: ' || SQLERRM);
+END UPDATE_BESUCHBAR_STATUS;
+/
