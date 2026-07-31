@@ -87,7 +87,7 @@ Mitarbeiterprozess zum bearbeiten der Validereungsanträge hinzugefügt.
 	- GET_OFFENE_ANTRAEGE
 	- VALIDIERUNGSANTRAG_BEARBEITEN
 
-Zudem haben wir eine neue Dateie hinzugefügt und zwei bearbeitet.
+Zudem haben wir eine neue Datei hinzugefügt und zwei bearbeitet.
 	Neu:
 	- antrag_bearbeiten.php
 	Darin werden die beiden neuen stored procedures ausgeführt.
@@ -96,3 +96,18 @@ Zudem haben wir eine neue Dateie hinzugefügt und zwei bearbeitet.
 	- style.css
 	- dashboard_mitarbeiter.php
 	In "dashboard[...].php" werden die Validerungsanträge in der Tabelle, auf der Website, hinzugefügt/ bzw. angezeigt.
+
+
+Joel Jantschik (31.07.2026)
+	Proceduren:
+	- UPDATE_BESUCHBAR_STATUS
+
+Es wurden Dateien bearbeitet und hinzugefügt:
+	
+	Neu:
+	- mitarbeiter_gefangene.php
+
+	Bearbeitet:
+	- user login_check.php
+	- db_login.php
+	- Stored_Procedures.sql
